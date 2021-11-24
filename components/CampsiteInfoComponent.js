@@ -1,8 +1,6 @@
 import React, { Component } from 'react';
 import { Text, View, ScrollView, StyleSheet, Button, FlatList, Modal, } from 'react-native';
 import { Card, Icon, Input, Rating } from 'react-native-elements';
-import { CAMPSITES } from '../shared/campsites';
-import { COMMENTS } from '../shared/comments';
 import { connect } from 'react-redux';
 import { baseUrl } from '../shared/baseUrl';
 import { postFavorite, postComment } from '../redux/ActionCreators';
@@ -131,8 +129,8 @@ class CampsiteInfo extends Component {
         });
     }
 
-    markFavorite() {
-        this.setState({favorite: true});
+    markFavorite(campsiteId) {
+        this.props.postFavorite(campsiteId);
     }
 
     render() {
@@ -142,12 +140,11 @@ class CampsiteInfo extends Component {
         return (
             <ScrollView>
                 <RenderCampsite campsite={campsite}
-                    favorite={this.state.favorite}
-                    markFavorite={() => this.markFavorite()}
-                    onShowModal={() => this.toggleModal()}
+                    favorite={this.props.favorites.includes(campsiteId)}
+                    markFavorite={() => this.markFavorite(campsiteId)}
                 />
                 <RenderComments comments={comments} />
-                <Modal style={styles.modal}
+                <Modal
                     animationType={'slide'}
                     transparent={false}
                     visible={this.state.showModal}
