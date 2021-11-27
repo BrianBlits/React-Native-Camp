@@ -27,12 +27,20 @@ function RenderCampsite(props) {
 
     const {campsite} = props;
 
-    const recognizeDrag = ({dx}) => (dx < -200) ? true : false;
+    const view = React.createRef();
+
+    const recognizeDrag = ({dx}) => (dx < -200);
+
+    const recognizeComment = ({dx}) => (dx < 200);
 
     const panResponder = PanResponder.create({
         onStartShouldSetPanResponder: () => true,
+        onPanResponderGrant: () => {
+            view.current.rubberBand(1000)
+            .then(endState => console.log(endState.finished ? 'finished' : 'canceled'));
+        },
         onPanResponderEnd: (e, gestureState) => {
-            console.log('pan responder end', gestureState);
+            console.log('pan responder end', gestureState)
             if (recognizeDrag(gestureState)) {
                 Alert.alert(
                     'Add Favorite',
@@ -51,6 +59,10 @@ function RenderCampsite(props) {
                     ],
                     { cancelable: false }
                 );
+                
+            }
+            else if (recognizeComment(gestureState)) {
+                props.onShowModal()
             }
             return true;
         }
@@ -62,6 +74,7 @@ function RenderCampsite(props) {
                 animation='fadeInDown'
                 duration={2000}
                 delay={1000}
+                ref = {view}
                 {...panResponder.panHandlers}>
                 <Card
                     featuredTitle={campsite.name}
@@ -145,11 +158,6 @@ class CampsiteInfo extends Component {
         this.setState({showModal: !this.state.showModal});
     }
 
-    // handleCampsiteInfo(campsiteId) {
-    //     console.log(JSON.stringify(this.state));
-    //     this.toggleModal();
-    // }
-
     handleComment(campsiteId){
         this.props.postComment(
             campsiteId,
@@ -182,6 +190,7 @@ class CampsiteInfo extends Component {
                 <RenderCampsite campsite={campsite}
                     favorite={this.props.favorites.includes(campsiteId)}
                     markFavorite={() => this.markFavorite(campsiteId)}
+                    onShowModal={() => this.toggleModal()}
                 />
                 <RenderComments comments={comments} />
                 <Modal
